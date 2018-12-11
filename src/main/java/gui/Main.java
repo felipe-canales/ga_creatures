@@ -105,8 +105,8 @@ public class Main extends GameApplication {
             e.removeFromWorld();
         }
         for (Entity e : getGameWorld().getEntitiesByType(EntityTypes.NODE)) {
-            getPhysicsWorld().getJBox2DWorld().destroyBody(e.getComponent(PhysicsComponent.class).getBody());
-            e.removeComponent(PhysicsComponent.class);
+            //getPhysicsWorld().getJBox2DWorld().destroyBody(e.getComponent(PhysicsComponent.class).getBody());
+            //e.removeComponent(PhysicsComponent.class);
             e.removeFromWorld();
         }
         //getPhysicsWorld().getJBox2DWorld().setContinuousPhysics(true);

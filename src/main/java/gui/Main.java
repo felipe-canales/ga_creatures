@@ -39,6 +39,15 @@ public class Main extends GameApplication {
         numberOfCreatures = 10;
         // Fin parametros
         
+        try {
+        	FileWriter b = new FileWriter("best_log.txt");
+        	FileWriter m = new FileWriter("mean_log.txt");
+        	b.close();
+        	m.close();
+        }
+        catch (IOException e) {
+        	System.err.println("Error!");
+        }
     }
 
     @Override
@@ -177,7 +186,7 @@ public class Main extends GameApplication {
 			m.write('\n');
 			m.close();
 		} catch (IOException e) {
-			System.out.println("Error!");
+			System.err.println("Error!");
 		}
     }
 }

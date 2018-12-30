@@ -42,7 +42,6 @@ public abstract class MaximizingGeneticAlgorithm implements IGeneticAlgtorithm {
         double best = 0;
         for ( Double x : fitness )
             best = best > x? best : x;
-        best /= fitness.size();
         return best;
     }
 
@@ -51,7 +50,6 @@ public abstract class MaximizingGeneticAlgorithm implements IGeneticAlgtorithm {
         double worst = 0;
         for ( Double x : fitness )
             worst = worst < x? worst : x;
-        worst /= fitness.size();
         return worst;
     }
 

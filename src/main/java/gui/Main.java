@@ -1,10 +1,12 @@
 package gui;
 
 import com.almasb.fxgl.app.GameApplication;
+import com.almasb.fxgl.app.State;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.physics.box2d.dynamics.Body;
 import com.almasb.fxgl.settings.GameSettings;
+import com.almasb.fxgl.app.StateChangeListener;
 import facade.Facade;
 import gui.auxclasses.CreatureFactory;
 import gui.auxclasses.MuscleComponent;
@@ -13,19 +15,30 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
 public class Main extends GameApplication {
     private int secondsPerCreature;
     private Facade f;
+    private int numberOfCreatures;
+    private ArrayList<Double> bestPerGen;
 
     @Override
     protected void initSettings(GameSettings gameSettings) {
         gameSettings.setWidth(800);
         gameSettings.setHeight(600);
         gameSettings.setTitle("Creatures");
+        bestPerGen = new ArrayList<>();
+        
+        // Parametros del programa
         secondsPerCreature = 5;
+        numberOfCreatures = 10;
+        // Fin parametros
+        
     }
 
     @Override
@@ -39,7 +52,7 @@ public class Main extends GameApplication {
         for (int i = 0; i < 20; i++)
             getGameWorld().addEntity(SceneFactory.staticMarker(i*800.0));
 
-        f = new Facade(4);
+        f = new Facade(numberOfCreatures);
 
         getMasterTimer().runAtInterval(this::updateState, Duration.millis(20));
         ArrayList<Entity> creature = CreatureFactory.newCreature(f.getCreature(), getMasterTimer());
@@ -66,7 +79,7 @@ public class Main extends GameApplication {
     protected void initUI() {
         Font font = new Font(30);
         ArrayList<Text> labels = new ArrayList<>();
-        labels.add(new Text(15, 480, "Generación:"));
+        labels.add(new Text(15, 480, "Generacion:"));
         labels.add(new Text(15, 550, "Sujeto:"));
         labels.add(new Text(270, 550, "Fitness:"));
         labels.add(new Text(520, 480, "Mejor:"));
@@ -105,11 +118,8 @@ public class Main extends GameApplication {
             e.removeFromWorld();
         }
         for (Entity e : getGameWorld().getEntitiesByType(EntityTypes.NODE)) {
-            //getPhysicsWorld().getJBox2DWorld().destroyBody(e.getComponent(PhysicsComponent.class).getBody());
-            //e.removeComponent(PhysicsComponent.class);
             e.removeFromWorld();
         }
-        //getPhysicsWorld().getJBox2DWorld().setContinuousPhysics(true);
         for (Entity e : getGameWorld().getEntitiesByType(EntityTypes.MARKER)) {
             e.removeFromWorld();
         }
@@ -127,6 +137,7 @@ public class Main extends GameApplication {
 
     private void newGen() {
         double[] x = f.newGen();
+        writeFitness(x);
         getGameState().intProperty("subject").setValue(1);
         getGameState().intProperty("gen").setValue(
                 getGameState().intProperty("gen").intValue() + 1);
@@ -147,10 +158,26 @@ public class Main extends GameApplication {
             x += e.getCenter().getX();
             nodes++;
         }
-        getGameState().doubleProperty("currentFitness").setValue(x);
-        getGameScene().getViewport().setX((x / nodes) - 400);
+        double center = nodes == 0? 0 : x / nodes;
+        getGameState().doubleProperty("currentFitness").setValue(center);
+        getGameScene().getViewport().setX(center - 400);
         for (Entity e : getGameWorld().getEntitiesByType(EntityTypes.MUSCLE)) {
             e.getComponent(MuscleComponent.class).flex();
         }
+    }
+    
+    private void writeFitness(double[] f) {
+    	try {
+			FileWriter b = new FileWriter("best_log.txt", true);
+			b.write(String.valueOf(f[0]));
+			b.write('\n');
+			b.close();
+			FileWriter m = new FileWriter("mean_log.txt", true);
+			m.write(String.valueOf(f[1]));
+			m.write('\n');
+			m.close();
+		} catch (IOException e) {
+			System.out.println("Error!");
+		}
     }
 }
